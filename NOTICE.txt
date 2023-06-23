@@ -1,0 +1,13 @@
+NppQrCode
+Copyright 2018 Vladimir Korobenkov (vladk1973)
+
+This product includes software developed by:
+
+ * Michael Demidov
+   https://github.com/MichaelDemidov/DelphiZXingQRCodeEx
+
+ * Foxit Software (formerly "Debenu Pty Ltd")
+   https://github.com/foxitsoftware/DelphiZXingQRCode
+
+ * ZXing Project
+   https://github.com/zxing
