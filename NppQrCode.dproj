@@ -11,6 +11,8 @@
         <Platform Condition="'$(Platform)'==''">Win64</Platform>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <DCC_ExeOutput>.\bin\$(Platform)\$(Config)</DCC_ExeOutput>
+        <DCC_DcuOutput>.\DCU\$(Platform)\$(Config)</DCC_DcuOutput>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
@@ -56,6 +58,8 @@
         <CfgParent>Cfg_2</CfgParent>
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
+        <PostBuildEvent><![CDATA[ren $(DCC_ExeOutput)\NppQrCode.rsm NppQrCode64.rsm
+$(PostBuildEvent)]]></PostBuildEvent>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_F>false</DCC_F>
@@ -72,14 +76,10 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <VerInfo_Build>1</VerInfo_Build>
-        <PostBuildEvent><![CDATA[ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode32.dll
+        <PostBuildEvent><![CDATA[ren $(DCC_ExeOutput)\NppQrCode.dll NppQrCode32.dll
 $(PostBuildEvent)]]></PostBuildEvent>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
-        <PreBuildEvent><![CDATA[del .\$(Platform)\$(Config)\NppQrCode*
-$(PreBuildEvent)]]></PreBuildEvent>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
-        <DCC_DcuOutput>.\DCU</DCC_DcuOutput>
         <Manifest_File>(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -87,17 +87,13 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <PostBuildEvent><![CDATA[ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode64.dll
+        <PostBuildEvent><![CDATA[ren $(DCC_ExeOutput)\NppQrCode.dll NppQrCode64.dll
 $(PostBuildEvent)]]></PostBuildEvent>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_Build>1</VerInfo_Build>
         <VerInfo_DLL>true</VerInfo_DLL>
-        <PreBuildEvent><![CDATA[del .\$(Platform)\$(Config)\NppQrCode*
-$(PreBuildEvent)]]></PreBuildEvent>
-        <DCC_DcuOutput>.\DCU</DCC_DcuOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>(None)</Manifest_File>
         <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -977,36 +973,8 @@ $(PreBuildEvent)]]></PreBuildEvent>
     <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
     <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
-    <PropertyGroup Condition="'$(Config)'=='Release' And '$(Platform)'=='Win32'">
-        <PreBuildEvent>del .\$(Platform)\$(Config)\NppQrCode* >NUL: &amp; git submodule update --checkout -f &amp; git apply $(PROJECTDIR)\patches\suppress_H2443.diff</PreBuildEvent>
+    <PropertyGroup Condition="'$(Config)'!=''">
+        <PreBuildEvent>del $(DCC_ExeOutput)\NppQrCode* 2>NUL: &amp; git submodule update --checkout -f >NUL: &amp; git apply $(PROJECTDIR)\patches\suppress_H2443.diff</PreBuildEvent>
         <PreBuildEventIgnoreExitCode>True</PreBuildEventIgnoreExitCode>
-        <PreLinkEvent/>
-        <PreLinkEventIgnoreExitCode>False</PreLinkEventIgnoreExitCode>
-        <PostBuildEvent>ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode32.dll</PostBuildEvent>
-        <PostBuildEventIgnoreExitCode>False</PostBuildEventIgnoreExitCode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Config)'=='Release' And '$(Platform)'=='Win64'">
-        <PreBuildEvent>del .\$(Platform)\$(Config)\NppQrCode* >NUL: &amp; git submodule update --checkout -f &amp; git apply $(PROJECTDIR)\patches\suppress_H2443.diff</PreBuildEvent>
-        <PreBuildEventIgnoreExitCode>True</PreBuildEventIgnoreExitCode>
-        <PreLinkEvent/>
-        <PreLinkEventIgnoreExitCode>False</PreLinkEventIgnoreExitCode>
-        <PostBuildEvent>ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode64.dll</PostBuildEvent>
-        <PostBuildEventIgnoreExitCode>False</PostBuildEventIgnoreExitCode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Config)'=='Debug' And '$(Platform)'=='Win32'">
-        <PreBuildEvent>del .\$(Platform)\$(Config)\NppQrCode* >NUL: &amp; git submodule update --checkout -f &amp; git apply $(PROJECTDIR)\patches\suppress_H2443.diff</PreBuildEvent>
-        <PreBuildEventIgnoreExitCode>True</PreBuildEventIgnoreExitCode>
-        <PreLinkEvent/>
-        <PreLinkEventIgnoreExitCode>False</PreLinkEventIgnoreExitCode>
-        <PostBuildEvent>ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode32.dll</PostBuildEvent>
-        <PostBuildEventIgnoreExitCode>False</PostBuildEventIgnoreExitCode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Config)'=='Debug' And '$(Platform)'=='Win64'">
-        <PreBuildEvent>del .\$(Platform)\$(Config)\NppQrCode* >NUL: &amp; git submodule update --checkout -f &amp; git apply $(PROJECTDIR)\patches\suppress_H2443.diff</PreBuildEvent>
-        <PreBuildEventIgnoreExitCode>True</PreBuildEventIgnoreExitCode>
-        <PreLinkEvent/>
-        <PreLinkEventIgnoreExitCode>False</PreLinkEventIgnoreExitCode>
-        <PostBuildEvent>ren .\$(Platform)\$(Config)\NppQrCode.dll NppQrCode64.dll</PostBuildEvent>
-        <PostBuildEventIgnoreExitCode>False</PostBuildEventIgnoreExitCode>
     </PropertyGroup>
 </Project>

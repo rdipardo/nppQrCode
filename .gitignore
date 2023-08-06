@@ -23,4 +23,5 @@
 */backup/
 +**[Bb]ackup/
 +lib/**
+bin/
 !NppQrCodeBMP.RES

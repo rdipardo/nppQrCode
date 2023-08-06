@@ -14,6 +14,12 @@ library NppQrCode;
  See the License for the specific language governing permissions and
  limitations under the License.
 *)
+
+{$IF CompilerVersion >= 21.0}
+{$WEAKLINKRTTI ON}
+{$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
+{$ENDIF}
+
 uses
   Winapi.Windows,
   Winapi.Messages,
