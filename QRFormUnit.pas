@@ -177,7 +177,7 @@ var
   F: TQrForm;
 begin
   S := SelectedText;
-  if S.Length > 0 then
+  if TrimRight(S).Length > 0 then
   begin
     F := TQrForm.Create(self);
     try
