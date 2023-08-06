@@ -1,28 +1,31 @@
 library NppQrCode;
+(*
+ Copyright 2018 Vladimir Korobenkov (vladk1973)
 
-{ Important note about DLL memory management: ShareMem must be the
-  first unit in your library's USES clause AND your project's (select
-  Project-View Source) USES clause if your DLL exports any procedures or
-  functions that pass strings as parameters or function results. This
-  applies to all strings passed to and from your DLL--even those that
-  are nested in records and classes. ShareMem is the interface unit to
-  the BORLNDMM.DLL shared memory manager, which must be deployed along
-  with your DLL. To avoid using BORLNDMM.DLL, pass string information
-  using PChar or ShortString parameters. }
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*)
 uses
   Winapi.Windows,
   Winapi.Messages,
   System.SysUtils,
   System.Classes,
-  DelphiZXIngQRCode in 'DelphiZXIngQRCode\DelphiZXIngQRCode.pas',
-  QRGraphics in 'DelphiZXIngQRCode\QRGraphics.pas',
+  DelphiZXIngQRCode in 'DelphiZXIngQRCode\Source\DelphiZXIngQRCode.pas',
+  QRGraphics in 'DelphiZXIngQRCode\Source\QRGraphics.pas',
   QRFormUnit in 'QRFormUnit.pas' {QrForm},
-  QR_Win1251 in 'DelphiZXIngQRCode\QR_Win1251.pas',
-  QR_URL in 'DelphiZXIngQRCode\QR_URL.pas',
-  NppForms in '..\npp.connections\lib\NppForms.pas' {NppForm},
-  nppplugin in '..\npp.connections\lib\nppplugin.pas',
-  SciSupport in '..\npp.connections\lib\SciSupport.pas';
+  QR_Win1251 in 'DelphiZXIngQRCode\Source\QR_Win1251.pas',
+  QR_URL in 'DelphiZXIngQRCode\Source\QR_URL.pas',
+  NppForms in 'Interface\Source\Forms\Common\NppForms.pas' {NppForm},
+  nppplugin in 'Interface\Source\Units\Common\nppplugin.pas';
 
 {$R *.res}
 

@@ -1,24 +1,40 @@
 unit QRFormUnit;
+(*
+ Copyright 2018 Vladimir Korobenkov (vladk1973)
 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*)
 interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.StdCtrls,
-  DelphiZXingQRCode, SciSupport, NppForms, NppPlugin;
+  DelphiZXingQRCode, NppForms, NppPlugin;
 
 type
 
   TQrPlugin = class(TNppPlugin)
   private
     { Private declarations }
+    function SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
     const cnstNoSelection = 'Please, select text before using';
     const cnstFunctionCaption = 'Encode selection to QR code';
     const cnstName = 'NppQrCode';
   public
     constructor Create;
     procedure DoNppnToolbarModification; override;
+    function SelectedText: string;
     procedure FuncQr;
   end;
 
@@ -91,7 +107,7 @@ var
 implementation
 
 uses
-  QRGraphics, QR_Win1251, QR_URL, jpeg, Clipbrd;
+  QRGraphics, QR_Win1251, QR_URL, jpeg, Clipbrd, System.UITypes;
 
 {$R *.dfm}
 
@@ -111,13 +127,48 @@ begin
   AddFuncItem(cnstFunctionCaption, _FuncQr);
 end;
 
+function TQrPlugin.SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
+begin
+  try
+    if SendMessageTimeout(_hwnd, Message, WPARAM(_wParam), LPARAM(_lParam), SMTO_NORMAL, 5000, @Result) = 0 then
+      RaiseLastOSError;
+  except
+    on E: EOSError do begin
+      raise;
+    end;
+    on E: Exception do begin
+      raise;
+    end;
+  end;
+end;
+
+function TQrPlugin.SelectedText: string;
+var
+  SelRange: Sci_Position;
+  Chars: AnsiString;
+begin
+  SelRange := SendMsg(NppData.ScintillaMainHandle, SCI_GETSELTEXT);
+  if Self.HasV5Apis then
+    Inc(SelRange);
+  Chars := AnsiString(StringOfChar(#0, SelRange));
+  SendMsg(NppData.ScintillaMainHandle, SCI_GETSELTEXT, 0, PAnsiChar(Chars));
+  case SendMsg(NppData.ScintillaMainHandle, SCI_GETCODEPAGE) of
+    SC_CP_UTF8:
+    begin
+      Result := UTF8toString(Chars);
+    end
+    else
+      Result := String(UTF8Encode(Chars))
+  end;
+end;
+
 procedure TQrPlugin.DoNppnToolbarModification;
 var
   tb: TToolbarIcons;
 begin
   tb.ToolbarIcon := 0;
   tb.ToolbarBmp := LoadImage(Hinstance, 'QRBITMAP', IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE));
-  Npp_Send(NPPM_ADDTOOLBARICON, WPARAM(self.CmdIdFromDlgId(0)), LPARAM(@tb));
+  SendMsg(NppData.NppHandle, NPPM_ADDTOOLBARICON, self.CmdIdFromDlgId(0), @tb);
 end;
 
 procedure TQrPlugin.FuncQr;

@@ -1,0 +1,13 @@
+diff --git a/DelphiZXIngQRCode/Source/QRGraphics.pas b/DelphiZXIngQRCode/Source/QRGraphics.pas
+index 1b792e6..f030455 100644
+--- a/DelphiZXIngQRCode/Source/QRGraphics.pas
++++ b/DelphiZXIngQRCode/Source/QRGraphics.pas
+@@ -78,7 +78,7 @@ procedure MakeMetafile(Metafile: TMetafile; Scale: Integer;
+ implementation
+ 
+ uses
+-  Classes;
++  Classes, System.UITypes;
+ 
+ procedure MakeBmp(Bitmap: TBitmap; Scale: Integer;
+   QRCode: TDelphiZXingQRCode; BColor, FColor: TColor;

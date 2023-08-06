@@ -1,0 +1,6 @@
+[submodule "DelphiZXIngQRCode"]
+	path = DelphiZXIngQRCode
+	url = https://github.com/MichaelDemidov/DelphiZXingQRCodeEx.git
+[submodule "DelphiPluginTemplate"]
+	path = Interface
+	url = https://bitbucket.org/rdipardo/delphiplugintemplate.git
