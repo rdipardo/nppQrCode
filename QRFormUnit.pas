@@ -144,15 +144,17 @@ end;
 
 function TQrPlugin.SelectedText: string;
 var
+  Editor: HWND;
   SelRange: Sci_Position;
   Chars: AnsiString;
 begin
-  SelRange := SendMsg(NppData.ScintillaMainHandle, SCI_GETSELTEXT);
+  Editor := CurrentScintilla;
+  SelRange := SendMsg(Editor, SCI_GETSELTEXT);
   if Self.HasV5Apis then
     Inc(SelRange);
   Chars := AnsiString(StringOfChar(#0, SelRange));
-  SendMsg(NppData.ScintillaMainHandle, SCI_GETSELTEXT, 0, PAnsiChar(Chars));
-  case SendMsg(NppData.ScintillaMainHandle, SCI_GETCODEPAGE) of
+  SendMsg(Editor, SCI_GETSELTEXT, 0, PAnsiChar(Chars));
+  case SendMsg(Editor, SCI_GETCODEPAGE) of
     SC_CP_UTF8:
     begin
       Result := UTF8toString(Chars);
@@ -168,7 +170,7 @@ var
 begin
   tb.ToolbarIcon := 0;
   tb.ToolbarBmp := LoadImage(Hinstance, 'QRBITMAP', IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE));
-  SendMsg(NppData.NppHandle, NPPM_ADDTOOLBARICON, self.CmdIdFromDlgId(0), @tb);
+  SendNppMessage(NPPM_ADDTOOLBARICON, self.CmdIdFromDlgId(0), @tb);
 end;
 
 procedure TQrPlugin.FuncQr;
