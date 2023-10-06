@@ -32,8 +32,8 @@
   limitations under the License.
 */
 #define PLUGIN_NAME "NppQrCode"
-#define PLUGIN_VERSION "0.0.0.1\0"
-#define PLUGIN_VERSION_WORDS 0,0,0,1
+#define PLUGIN_VERSION "0.0.0.2\0"
+#define PLUGIN_VERSION_WORDS 0,0,0,2
 
 QRBITMAP BITMAP "img/qr.bmp"
 
