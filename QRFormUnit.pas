@@ -1,5 +1,23 @@
 unit QRFormUnit;
 (*
+ Revised and updated by Robert Di Pardo, Copyright 2023
+
+ This program is free software: you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation, either version
+ 3 of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be
+ useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE. See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General
+ Public License along with this program. If not, see
+ <https://www.gnu.org/licenses/>.
+
+ This software incorporates work covered by the following copyright and permission notice:
+
  Copyright 2018 Vladimir Korobenkov (vladk1973)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,13 +47,27 @@ type
     { Private declarations }
     function SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
     const cnstNoSelection = 'Please, select text before using';
-    const cnstFunctionCaption = 'Encode selection to QR code';
+    const cnstFunctionCaption = '&Encode selection to QR code';
     const cnstName = 'NppQrCode';
   public
     constructor Create;
     procedure DoNppnToolbarModification; override;
     function SelectedText: string;
     procedure FuncQr;
+    procedure FuncShowHelp;
+  end;
+
+  TQRHelpDlg = class
+  private
+    FVersionStr: string;
+    procedure VisitRepo;
+    const cnstBitness = {$IFDEF CPUx64}64{$ELSE}32{$ENDIF};
+    const cnstAuthor = 'Vladimir Korobenkov';
+    const cnstMaintainer = 'Robert Di Pardo';
+    const cnstRepo = 'https://github.com/rdipardo/nppQrCode';
+  public
+    constructor Create;
+    procedure Show;
   end;
 
   TQrForm = class(TNppForm)
@@ -107,6 +139,7 @@ var
 implementation
 
 uses
+  ShellApi,
   QRGraphics, QR_Win1251, QR_URL, jpeg, Clipbrd, System.UITypes;
 
 {$R *.dfm}
@@ -116,15 +149,21 @@ begin
   NPlugin.FuncQr;
 end;
 
+procedure _FuncShowHelp; cdecl;
+begin
+  NPlugin.FuncShowHelp;
+end;
+
 { TQrPlugin }
 
 constructor TQrPlugin.Create;
-var
-  sk: TShortcutKey;
+// var
+//   sk: TShortcutKey;
 begin
   inherited;
   PluginName := cnstName;
   AddFuncItem(cnstFunctionCaption, _FuncQr);
+  AddFuncItem('&About...', _FuncShowHelp);
 end;
 
 function TQrPlugin.SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
@@ -192,6 +231,82 @@ begin
   else
     if Assigned(Application) then
       Application.MessageBox(cnstNoSelection,nppPChar(PluginName),MB_ICONSTOP + MB_OK);
+end;
+
+procedure TQrPlugin.FuncShowHelp;
+var
+  Dlg: TQRHelpDlg;
+begin
+  try
+    Dlg := TQRHelpDlg.Create;
+    Dlg.Show;
+  finally
+    FreeAndNil(Dlg);
+  end;
+end;
+
+{ TQRHelpDlg }
+
+constructor TQRHelpDlg.Create;
+var
+  DllName: PWChar;
+  PVerValue: PVSFixedFileInfo;
+  VerInfoSize, VerValueSize, Dummy: DWORD;
+  PVerInfo: PByte;
+begin
+  FVersionStr := EmptyStr;
+  DllName := PWChar(NPlugin.GetName + IntToStr(cnstBitness) + '.dll');
+  VerInfoSize := GetFileVersionInfoSizeW(DllName, Dummy);
+  if (VerInfoSize <> 0) then
+  begin
+    GetMem(PVerInfo, VerInfoSize);
+    try
+      if GetFileVersionInfoW(DllName, 0, VerInfoSize, PVerInfo) then
+      begin
+        if VerQueryValueW(PVerInfo, '\', Pointer(PVerValue), VerValueSize) then
+          with PVerValue^ do
+          begin
+            FVersionStr := Format('%d.%d.%d.%d (%d-bit)',
+              [HiWord(dwFileVersionMS), LoWord(dwFileVersionMS),
+              HiWord(dwFileVersionLS), LoWord(dwFileVersionLS), cnstBitness]);
+          end;
+      end;
+    finally
+      FreeMem(PVerInfo, VerInfoSize);
+    end;
+  end;
+end;
+
+procedure TQRHelpDlg.Show;
+const
+  Ln = #13#10;
+  Dln = #13#10#13#10;
+var
+  Msg: string;
+begin
+  Msg := Format('Version %s'+Ln, [FVersionStr]);
+  Msg := Concat(Msg, Format(#$00A9' 2018 %s (v0.0.0.1)'+Ln, [cnstAuthor]));
+  Msg := Concat(Msg, Format(#$00A9' 2023 %s (current version)'+Ln, [cnstMaintainer]));
+  Msg := Concat(Msg, 'Licensed under the GNU General Public License, v3 or later'+Dln);
+  Msg := Concat(Msg, 'Using:'+Ln);
+  Msg := Concat(Msg, 'DelphiZXingQRCode'+Ln);
+  Msg := Concat(Msg, #$00A9' Foxit Software, Apache License, Version 2.0'+DLn);
+  Msg := Concat(Msg, 'DelphiZXingQRCodeEx'+Ln);
+  Msg := Concat(Msg, #$00A9' 2014 Michael Demidov, Apache License, Version 2.0'+DLn);
+  Msg := Concat(Msg, 'ZXing barcode image processing library'+Ln);
+  Msg := Concat(Msg, #$00A9' 2008 ZXing authors, Apache License, Version 2.0'+DLn);
+  Msg := Concat(Msg, 'DelphiPluginTemplate'+Ln);
+  Msg := Concat(Msg, #$00A9' 2008 Damjan Zobo Cvetko, GPLv2 or later'+Ln);
+  Msg := Concat(Msg, Format(#$00A9' 2022 %s, GPLv3 or later and LGPLv3 or later'+Dln, [cnstMaintainer]));
+  Msg := Concat(Msg, 'Click OK to view project on GitHub'+Dln);
+  if IDOK = MessageBoxW(0, PWChar(Msg), PWChar('About ' + NPlugin.GetName), MB_OKCANCEL or MB_DEFBUTTON2 or MB_ICONINFORMATION)
+  then
+    VisitRepo;
+end;
+
+procedure TQRHelpDlg.VisitRepo;
+begin
+  ShellExecuteW(0, 'Open', PWChar(Self.cnstRepo), nil, nil, SW_SHOWNORMAL);
 end;
 
 { TQrForm }

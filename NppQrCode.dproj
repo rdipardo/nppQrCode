@@ -141,6 +141,9 @@ $(PostBuildEvent)]]></PostBuildEvent>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <RcCompile Include="$(MSBuildProjectName).rc">
+            <Form>$(MSBuildProjectName).res</Form>
+        </RcCompile>
         <DCCReference Include="DelphiZXIngQRCode\Source\DelphiZXIngQRCode.pas"/>
         <DCCReference Include="DelphiZXIngQRCode\Source\QRGraphics.pas"/>
         <DCCReference Include="QRFormUnit.pas">
