@@ -12,6 +12,7 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 
 ## Building
 
+> **Important**
 > You must have Delphi RAD Studio installed with support for the 64-bit Windows platform. Version 10.1 (Berlin) or newer is recommended.
 >
 > Make sure to clone all subprojects to your local source tree:

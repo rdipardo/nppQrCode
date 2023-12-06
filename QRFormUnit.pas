@@ -204,12 +204,35 @@ begin
 end;
 
 procedure TQrPlugin.DoNppnToolbarModification;
+const
+  hNil = THandle(Nil);
 var
   tb: TToolbarIcons;
+  tbDM: TTbIconsDarkMode;
+  hHDC: HDC;
+  bmpX, bmpY, icoX, icoY: Integer;
 begin
-  tb.ToolbarIcon := 0;
-  tb.ToolbarBmp := LoadImage(Hinstance, 'QRBITMAP', IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE));
-  SendNppMessage(NPPM_ADDTOOLBARICON, self.CmdIdFromDlgId(0), @tb);
+  hHDC := hNil;
+  try
+    hHDC := GetDC(hNil);
+    bmpX := MulDiv(16, GetDeviceCaps(hHDC, LOGPIXELSX), 96);
+    bmpY := MulDiv(16, GetDeviceCaps(hHDC, LOGPIXELSY), 96);
+    icoX := MulDiv(32, GetDeviceCaps(hHDC, LOGPIXELSX), 96);
+    icoY := MulDiv(32, GetDeviceCaps(hHDC, LOGPIXELSY), 96);
+  finally
+    ReleaseDC(hNil, hHDC);
+  end;
+  tb.ToolbarIcon := LoadImage(Hinstance, 'QRICON', IMAGE_ICON, icoX, icoY, (LR_DEFAULTSIZE or LR_LOADTRANSPARENT));
+  tb.ToolbarBmp := LoadImage(Hinstance, 'QRBITMAP', IMAGE_BITMAP, bmpX, bmpY, 0);
+  if SupportsDarkMode then begin
+    with tbDM do begin
+      ToolbarBmp := tb.ToolbarBmp;
+      ToolbarIcon := tb.ToolbarIcon;
+      ToolbarIconDarkMode := tb.ToolbarIcon;
+    end;
+    SendNppMessage(NPPM_ADDTOOLBARICON_FORDARKMODE, self.CmdIdFromDlgId(0), @tbDm);
+  end else
+    SendNppMessage(NPPM_ADDTOOLBARICON_DEPRECATED, self.CmdIdFromDlgId(0), @tb);
 end;
 
 procedure TQrPlugin.FuncQr;
