@@ -1,18 +1,18 @@
 # NppQrCode
 
 A Notepad++ plugin for creating QR codes from selected text.
-Just select some text and click the <img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/develop/img/qr.jpg"> button.
+Just select some text and click the <img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/qr.jpg"> button.
 
 <div align="center">
 	<a href="https://github.com/rdipardo/NppQrCode">
-		<img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/develop/img/hello.jpg">
+		<img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/hello.jpg">
 	</a>
 </div>
 
 
 ## Building
 
-> **Important**
+> [!Important]
 > You must have Delphi RAD Studio installed with support for the 64-bit Windows platform. Version 10.1 (Berlin) or newer is recommended.
 >
 > Make sure to clone all subprojects to your local source tree:
