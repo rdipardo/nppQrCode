@@ -1,6 +1,6 @@
 @echo off
 ::
-:: Copyright (C) 2023 Robert Di Pardo <dipardo.r@gmail.com>
+:: Copyright (C) 2023,2024 Robert Di Pardo <dipardo.r@gmail.com>
 ::
 :: Permission to use, copy, modify, and/or distribute this software for any purpose
 :: with or without fee is hereby granted.
@@ -16,6 +16,8 @@
 SETLOCAL
 set "VERSION=0.0.0.2"
 set "PLUGIN=NppQrCode"
+set "PLUGIN_DLL=.\bin\Win32\Release\%PLUGIN%.32.dll"
+set "PLUGINX64_DLL=.\bin\Win64\Release\%PLUGIN%.64.dll"
 set "SLUG_NAME=bin\%PLUGIN%-%VERSION%-win32"
 set "SLUGX64_NAME=bin\%PLUGIN%-%VERSION%-x64"
 set "SLUG=%SLUG_NAME%.zip"
@@ -28,6 +30,8 @@ call %~dp0build.cmd Release 32
 
 echo D | xcopy /DIY *.txt ".\bin\Copyright"
 echo D | xcopy /DIY "Interface\Source\Include\LICENSE.*" ".\bin\Copyright"
+echo F | xcopy /DVY "%PLUGIN_DLL%" %PLUGIN_DLL:~0,-7%32.dll
+echo F | xcopy /DVY "%PLUGINX64_DLL%" %PLUGINX64_DLL:~0,-7%64.dll
 7z a -tzip "%SLUG%" ".\bin\Win32\Release\%PLUGIN%32.dll" %DOCS% -y
 7z a -tzip "%SLUGX64%" ".\bin\Win64\Release\%PLUGIN%64.dll" %DOCS% -y
 ENDLOCAL
