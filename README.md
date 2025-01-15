@@ -17,7 +17,7 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 >
 > Make sure to clone all subprojects to your local source tree:
 >
->     git submodule update --init --remote
+>     git submodule update --init --recursive
 
 ### Using the MSBuild CLI
 
