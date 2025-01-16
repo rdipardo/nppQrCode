@@ -241,11 +241,12 @@ var
   F: TQrForm;
 begin
   S := SelectedText;
-  if TrimRight(S).Length > 0 then
+  if Length(TrimRight(S)) > 0 then
   begin
     F := TQrForm.Create(self);
     try
       F.Text := S;
+      F.cmbEncodingChange(self);
       F.ShowModal;
     finally
       F.Free;
@@ -401,6 +402,7 @@ begin
       ')';
   finally
     pbPreview.Repaint;
+    pgcQRDetailsChange(self);
   end;
 end;
 
