@@ -466,7 +466,7 @@ begin
         raise;
       end
       else
-        if S = '.jpg' then
+        if Pos(S, Copy(dlgSaveToFile.Filter, Pos('JPEG', dlgSaveToFile.Filter) + 4)) > 0 then
         try
           Bmp := TBitmap.Create;
           MakeBmp(Bmp, udScaleToSave.Position, FQRCode,
