@@ -31,10 +31,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-#define PLUGIN_NAME "NppQrCode"
 #define PLUGIN_VERSION "0.0.0.2\0"
 #define PLUGIN_VERSION_WORDS 0,0,0,2
 
+MAINICON ICON   "img/qr.ico"
 QRBITMAP BITMAP "img/qr.bmp"
 QRICON   ICON   "img/qr.ico"
 
@@ -52,12 +52,12 @@ BEGIN
     BLOCK "040904b0"
     BEGIN
       VALUE "CompanyName", "https://github.com/rdipardo/nppQrCode\0"
-      VALUE "FileDescription", PLUGIN_NAME" plugin for Notepad++\0"
+      VALUE "FileDescription", "NppQrCode plugin for Notepad++\0"
       VALUE "FileVersion", PLUGIN_VERSION
-      VALUE "InternalName", PLUGIN_NAME"\0"
+      VALUE "InternalName", "NppQrCode\0"
       VALUE "LegalCopyright", "(c) 2018 Vladimir Korobenkov (vladk1973)\0"
-      VALUE "OriginalFilename", PLUGIN_NAME".dll\0"
-      VALUE "ProductName", PLUGIN_NAME"\0"
+      VALUE "OriginalFilename", "NppQrCode.dll\0"
+      VALUE "ProductName", "NppQrCode\0"
       VALUE "ProductVersion", PLUGIN_VERSION
       VALUE "Comments", "Revised and updated by Robert Di Pardo, (c) 2023\0"
     END

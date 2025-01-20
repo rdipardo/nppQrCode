@@ -20,7 +20,6 @@
 *.zip
 */__history/
 */__recovery/
-*/backup/
-+**[Bb]ackup/
-+lib/**
+**[Bb]ackup/
+lib/**
 bin/

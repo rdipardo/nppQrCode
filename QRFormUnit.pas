@@ -1,6 +1,6 @@
 unit QRFormUnit;
 (*
- Revised and updated by Robert Di Pardo, Copyright 2023
+ Revised and updated by Robert Di Pardo, Copyright 2023,2025
 
  This program is free software: you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -32,12 +32,20 @@ unit QRFormUnit;
  See the License for the specific language governing permissions and
  limitations under the License.
 *)
+{$ifdef FPC}{$mode delphiunicode}{$endif}
+
 interface
 
 uses
+{$ifdef FPC}
+  Windows, SysUtils, Classes, Interfaces, LCLIntf, LCLType,
+  Graphics, Controls, Forms, Dialogs, ColorBox,
+  ExtCtrls, ComCtrls, StdCtrls, Metafiles,
+{$else}
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.StdCtrls,
+{$endif}
   DelphiZXingQRCode, NppForms, NppPlugin;
 
 type
@@ -119,6 +127,7 @@ type
     procedure clrbxBackgroundChange(Sender: TObject);
     procedure btnCopyClick(Sender: TObject);
     procedure pgcQRDetailsChange(Sender: TObject);
+    procedure ToggleDarkMode; override;
   private
     FQRCode: TDelphiZXingQRCode;
     FText: string;
@@ -140,9 +149,20 @@ implementation
 
 uses
   ShellApi,
-  QRGraphics, QR_Win1251, QR_URL, jpeg, Clipbrd, System.UITypes;
+  QRGraphics, QR_Win1251, QR_URL, {$ifndef FPC}jpeg,{$endif} Clipbrd, System.UITypes;
 
+{$ifdef FPC}
+{$R *.lfm}
+{$else}
 {$R *.dfm}
+{$endif}
+
+{$ifndef FPC}
+  function UnicodeFormat(const FmtStr: string; Args: array of const): string;
+  begin
+    Result := Format(FmtStr, Args);
+  end;
+{$endif}
 
 procedure _FuncQr; cdecl;
 begin
@@ -169,7 +189,7 @@ end;
 function TQrPlugin.SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
 begin
   try
-    if SendMessageTimeout(_hwnd, Message, WPARAM(_wParam), LPARAM(_lParam), SMTO_NORMAL, 5000, @Result) = 0 then
+    if SendMessageTimeoutW(_hwnd, Message, WPARAM(_wParam), LPARAM(_lParam), SMTO_NORMAL, 5000, @Result) = 0 then
       RaiseLastOSError;
   except
     on E: EOSError do begin
@@ -254,7 +274,7 @@ begin
   end
   else
     if Assigned(Application) then
-      Application.MessageBox(cnstNoSelection,nppPChar(PluginName),MB_ICONSTOP + MB_OK);
+      MessageBoxW(NppData.nppHandle, nppPChar(cnstNoSelection), nppPChar(PluginName), MB_ICONSTOP + MB_OK);
 end;
 
 procedure TQrPlugin.FuncShowHelp;
@@ -278,8 +298,8 @@ var
   VerInfoSize, VerValueSize, Dummy: DWORD;
   PVerInfo: PByte;
 begin
-  FVersionStr := EmptyStr;
-  DllName := PWChar(NPlugin.GetName + IntToStr(cnstBitness) + '.dll');
+  FVersionStr := '';
+  DllName := @UnicodeFormat('%s%d.dll', [NPlugin.GetName, cnstBitness])[1];
   VerInfoSize := GetFileVersionInfoSizeW(DllName, Dummy);
   if (VerInfoSize <> 0) then
   begin
@@ -290,7 +310,7 @@ begin
         if VerQueryValueW(PVerInfo, '\', Pointer(PVerValue), VerValueSize) then
           with PVerValue^ do
           begin
-            FVersionStr := Format('%d.%d.%d.%d (%d-bit)',
+            FVersionStr := UnicodeFormat('%d.%d.%d.%d (%d-bit)',
               [HiWord(dwFileVersionMS), LoWord(dwFileVersionMS),
               HiWord(dwFileVersionLS), LoWord(dwFileVersionLS), cnstBitness]);
           end;
@@ -308,9 +328,9 @@ const
 var
   Msg: string;
 begin
-  Msg := Format('Version %s'+Ln, [FVersionStr]);
-  Msg := Concat(Msg, Format(#$00A9' 2018 %s (v0.0.0.1)'+Ln, [cnstAuthor]));
-  Msg := Concat(Msg, Format(#$00A9' 2023 %s (current version)'+Ln, [cnstMaintainer]));
+  Msg := UnicodeFormat('Version %s'+Ln, [FVersionStr]);
+  Msg := Concat(Msg, UnicodeFormat(#$00A9' 2018 %s (v0.0.0.1)'+Ln, [cnstAuthor]));
+  Msg := Concat(Msg, UnicodeFormat(#$00A9' 2023 %s (current version)'+Ln, [cnstMaintainer]));
   Msg := Concat(Msg, 'Licensed under the GNU General Public License, v3 or later'+Dln);
   Msg := Concat(Msg, 'Using:'+Ln);
   Msg := Concat(Msg, 'DelphiZXingQRCode'+Ln);
@@ -321,7 +341,7 @@ begin
   Msg := Concat(Msg, #$00A9' 2008 ZXing authors, Apache License, Version 2.0'+DLn);
   Msg := Concat(Msg, 'DelphiPluginTemplate'+Ln);
   Msg := Concat(Msg, #$00A9' 2008 Damjan Zobo Cvetko, GPLv2 or later'+Ln);
-  Msg := Concat(Msg, Format(#$00A9' 2022 %s, GPLv3 or later and LGPLv3 or later'+Dln, [cnstMaintainer]));
+  Msg := Concat(Msg, UnicodeFormat(#$00A9' 2022 %s, GPLv3 or later and LGPLv3 or later'+Dln, [cnstMaintainer]));
   Msg := Concat(Msg, 'Click OK to view project on GitHub'+Dln);
   if IDOK = MessageBoxW(0, PWChar(Msg), PWChar('About ' + NPlugin.GetName), MB_OKCANCEL or MB_DEFBUTTON2 or MB_ICONINFORMATION)
   then
@@ -348,12 +368,12 @@ begin
   FQRCode := nil;
 
   // number edit
-  SetWindowLong(edtQuietZone.Handle, GWL_STYLE,
-    GetWindowLong(edtQuietZone.Handle, GWL_STYLE) or ES_NUMBER);
-  SetWindowLong(edtCornerThickness.Handle, GWL_STYLE,
-    GetWindowLong(edtCornerThickness.Handle, GWL_STYLE) or ES_NUMBER);
-  SetWindowLong(edtScaleToSave.Handle, GWL_STYLE,
-    GetWindowLong(edtScaleToSave.Handle, GWL_STYLE) or ES_NUMBER);
+  SetWindowLongPtr(edtQuietZone.Handle, GWL_STYLE,
+    GetWindowLongPtr(edtQuietZone.Handle, GWL_STYLE) or ES_NUMBER);
+  SetWindowLongPtr(edtCornerThickness.Handle, GWL_STYLE,
+    GetWindowLongPtr(edtCornerThickness.Handle, GWL_STYLE) or ES_NUMBER);
+  SetWindowLongPtr(edtScaleToSave.Handle, GWL_STYLE,
+    GetWindowLongPtr(edtScaleToSave.Handle, GWL_STYLE) or ES_NUMBER);
 
   Position := poScreenCenter;
   with cmbEncoding do
@@ -385,6 +405,11 @@ begin
 
 end;
 
+procedure TQrForm.ToggleDarkMode;
+begin
+  // TODO: implement a dark mode theme
+end;
+
 procedure TQrForm.RemakeQR;
 // QR-code generation
 begin
@@ -397,9 +422,8 @@ begin
       (cbbErrorCorrectionLevel.ItemIndex);
     QuietZone := StrToIntDef(edtQuietZone.Text, 4);
     EndUpdate(True);
-    lblQRMetrics.Caption := IntToStr(Columns) + 'x' + IntToStr(Rows) + ' (' +
-      IntToStr(Columns - QuietZone * 2) + 'x' + IntToStr(Rows - QuietZone * 2) +
-      ')';
+    lblQRMetrics.Caption := {$ifdef FPC}UTF8Encode{$endif}(
+      UnicodeFormat('%dx%d (%dx%d)', [Columns, Rows, (Columns - QuietZone * 2), (Rows - QuietZone * 2)]));
   finally
     pbPreview.Repaint;
     pgcQRDetailsChange(self);
@@ -425,7 +449,10 @@ var
 begin
   if dlgSaveToFile.Execute then
   begin
-    S := LowerCase(ExtractFileExt(dlgSaveToFile.FileName));
+{$ifdef FPC}
+    dlgSaveToFile.FileName := UTF8Encode(dlgSaveToFile.FileName);
+{$endif}
+    S := LowerCase(ExtractFileExt({$ifdef FPC}UTF8Decode{$endif}(dlgSaveToFile.FileName)));
     if S = '' then
     begin
       case dlgSaveToFile.FilterIndex of
@@ -433,7 +460,7 @@ begin
         2: S := '.emf';
         3: S := '.jpg';
       end;
-      dlgSaveToFile.FileName := dlgSaveToFile.FileName + S;
+      dlgSaveToFile.FileName := {$ifdef FPC}UTF8Encode{$endif}(UnicodeFormat('%s%s',[dlgSaveToFile.FileName, S]));
     end;
 
     edtFileName.Text := dlgSaveToFile.FileName;
@@ -536,8 +563,8 @@ begin
           S := 'Default'
         else
           S := 'Extended';
-        Canvas.TextOut((R1.Left + R1.Right - Canvas.TextWidth(S)) div 2, R1.Top,
-          S);
+        Canvas.TextOut((R1.Left + R1.Right - Canvas.TextWidth({$ifdef FPC}UTF8Encode{$endif}(S))) div 2, R1.Top,
+          {$ifdef FPC}UTF8Encode{$endif}(S));
         Canvas.Font.Assign(Font);
         Canvas.Brush.Color := OldColor;
         Canvas.Font.Color := OldFontColor;
@@ -555,7 +582,7 @@ end;
 
 procedure TQrForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
-  procedure InvalidateControl(W: TWinControl);
+  procedure _InvalidateControl(W: TWinControl);
   var
     I: Integer;
   begin
@@ -563,7 +590,7 @@ procedure TQrForm.FormKeyDown(Sender: TObject; var Key: Word;
     begin
       for I := 0 to ControlCount - 1 do
         if Controls[I] is TWinControl then
-          InvalidateControl(Controls[I] as TWinControl);
+          _InvalidateControl(Controls[I] as TWinControl);
       Invalidate;
     end;
   end;
@@ -573,7 +600,7 @@ const KEY_ESC = 27;
 begin
   if not FAltFixed and (ssAlt in Shift) then
   begin
-    InvalidateControl(Self);
+    _InvalidateControl(Self);
     FAltFixed := True;
   end;
 
@@ -595,7 +622,7 @@ end;
 
 procedure TQrForm.pgcQRDetailsChange(Sender: TObject);
 begin
-  mmoEncodedData.Text := FQRCode.FilteredData;
+  mmoEncodedData.Text := {$ifdef FPC}UTF8Encode{$endif}(FQRCode.FilteredData);
 end;
 
 procedure TQrForm.clrbxBackgroundChange(Sender: TObject);
@@ -620,4 +647,13 @@ begin
   end;
 end;
 
+{$ifdef FPC}
+initialization
+  Application.CaptureExceptions := True;
+{$ifdef VER3_2}
+  Application.Scaled := True;
+  RequireDerivedFormResource := True;
+{$endif}
+  Application.Initialize;
+{$endif}
 end.

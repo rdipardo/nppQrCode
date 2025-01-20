@@ -1,0 +1,76 @@
+version: 2.1
+#
+# SPDX-FileCopyrightText: Copyright (c) 2025 Robert Di Pardo
+# SPDX-License-Identifier: GPL-3.0-or-later OR Apache-2.0
+#
+orbs:
+  lazarus: rdipardo/lazarus@3
+  win: circleci/windows@5
+
+references:
+  executor: &executor
+    executor:
+      name: win/default
+      shell: bash.exe
+  development: &development
+    filters:
+      tags:
+        only: /v.*/
+  production: &production
+    filters:
+      branches:
+        ignore: /.*/
+      tags:
+        only: /v.*/
+
+jobs:
+  push-release:
+    <<: *executor
+    parameters:
+      plugin-name:
+        type: string
+        default: NppQrCode
+    environment:
+      UPX_VER: 4.2.4
+      UPX_DIR: "C:\\upx"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install UPX
+          command: |
+            mkdir -p "$UPX_DIR"
+            curl -sLO "https://github.com/upx/upx/releases/download/v$UPX_VER/upx-$UPX_VER-win64.zip"
+            7z e upx-$UPX_VER-win64.zip -o"$UPX_DIR"
+            "$UPX_DIR\\upx.exe" --version
+      - run:
+         name: Pack Release Artifacts
+         command: |
+           "$UPX_DIR\\upx.exe" "bin\\i386-win32\\Release\\<< parameters.plugin-name >>32.dll"
+           "$UPX_DIR\\upx.exe" "bin\\x86_64-win64\\Release\\<< parameters.plugin-name >>64.dll"
+      - run:
+         name: Make Release Bundles
+         command: .\lazarus\make_release.cmd
+         shell: cmd.exe
+      - store_artifacts:
+          name: Upload << parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
+          path: bin/<< parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
+          destination: << parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
+      - store_artifacts:
+          name: Upload << parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
+          path: bin/<< parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
+          destination: << parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
+
+workflows:
+  lazarus-build:
+    jobs:
+      - lazarus/build-win:
+          project: NppQrCode
+          bin-dir: bin
+          build-type: Release
+          cross-build: true
+          <<: *development
+      - push-release:
+          <<: *production
+          requires: [lazarus/build-win]

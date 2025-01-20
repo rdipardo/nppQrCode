@@ -1,5 +1,7 @@
 # NppQrCode
 
+![Built with Free Pascal][fpc]  [![cci-badge][]][cci-status]
+
 A Notepad++ plugin for creating QR codes from selected text.
 Just select some text and click the <img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/qr.jpg"> button.
 
@@ -12,14 +14,34 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 
 ## Building
 
+Clone this repo and all subprojects:
+
+    git clone --recursive https://github.com/rdipardo/nppQrCode.git
+
+or, from inside your local source tree:
+
+    git submodule update --init --recursive
+
+### Lazarus
+
+Install [Lazarus](https://www.lazarus-ide.org) for 64-bit Windows from [SourceForge](https://sourceforge.net/projects/lazarus/files),
+or *via* the [Scoop](https://scoop.sh/#/apps?q=lazarus) package manager.
+
+> [!Note]
+> A separate 32-bit installation is needed for building x86 Windows binaries. See [here][3] for more information.
+
+Double-click the 'NppQrCode.lpi' file. If prompted, click the *Open project* button.
+
+Expand the Lazarus IDE's [*Run* menu](https://wiki.lazarus.freepascal.org/Main_menu#Run) and click *Build*.
+
+To build using `lazbuild.exe` at the command line, see [here][4] for a guide to setting up your environment.
+
+### Delphi
+
 > [!Important]
 > You must have Delphi RAD Studio installed with support for the 64-bit Windows platform. Version 10.1 (Berlin) or newer is recommended.
->
-> Make sure to clone all subprojects to your local source tree:
->
->     git submodule update --init --recursive
 
-### Using the MSBuild CLI
+#### Using the MSBuild CLI
 
 #### Delphi 10.4 (Sydney)
 
@@ -30,7 +52,7 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 Edit 'build.cmd' and change the `BDS_ENV` variable to the full path of 'rsvars.bat' in the 'bin' directory of your RAD Studio installation.
 Then run the script as above.
 
-### Using Delphi RAD Studio
+#### Using Delphi RAD Studio
 
 <ol>
 <li>Open NppQrCode.dpr</li>
@@ -56,5 +78,10 @@ Public License, Version 2.0. Visit [the template repository][1] for complete inf
 [0]: https://github.com/foxitsoftware/DelphiZXingQRCode
 [1]: https://bitbucket.org/rdipardo/DelphiPluginTemplate
 [2]: https://sourceforge.net/projects/npp-plugins/files/DelphiPluginTemplate
+[3]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-installing-lazarus
+[4]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-at-the-command-line
 [DelphiZXingQRCodeEx]: https://github.com/MichaelDemidov/DelphiZXingQRCodeEx
 [ZXing]: https://github.com/zxing
+[cci-status]: https://circleci.com/gh/rdipardo/nppQrCode
+[cci-badge]: https://circleci.com/gh/rdipardo/nppQrCode.svg?style=svg
+[fpc]: https://img.shields.io/github/languages/top/rdipardo/nppQRCode?style=flat-square&color=lightblue&label=Free%20Pascal&logo=lazarus
