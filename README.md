@@ -11,6 +11,34 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 	</a>
 </div>
 
+## Installation
+
+### Plugins Admin (recommended)
+
+A builtin [plugin manager] is available in Notepad++ versions 7.6 and newer.
+
+Find *Plugins* on the main menu bar and select *Plugins Admin...*.
+Check the box beside *NpQrCode* and click *Install*.
+
+### Manual installation
+
+- Download a [release archive]
+
+- __System-wide Notepad++ installation__
+
+  + Create a folder named `NppQrCode64` under `%ProgramFiles%\Notepad++\plugins` (64-bit),
+    or (for 32-bit versions) create a folder named `NppQrCode32` under `%ProgramFiles(x86)%\Notepad++\plugins`
+
+- __Portable Notepad++__
+
+  + Locate the `plugins` folder where `notepad++.exe` is installed
+  + Create a folder named `NppQrCode64` (64-bit) or `NppQrCode32` (32-bit)
+
+- Extract `NppQrCode64.dll` (64-bit) or `NppQrCode32.dll` (32-bit) from the downloaded ZIP archive
+
+- Move `NppQrCode64.dll` (64-bit) or `NppQrCode32.dll` (32-bit) into the corresponding folder
+
+- Restart Notepad++ if it’s already running
 
 ## Building
 
@@ -80,6 +108,8 @@ Public License, Version 2.0. Visit [the template repository][1] for complete inf
 [2]: https://sourceforge.net/projects/npp-plugins/files/DelphiPluginTemplate
 [3]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-installing-lazarus
 [4]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-at-the-command-line
+[release archive]: https://github.com/rdipardo/nppQrCode/releases
+[plugin manager]: https://npp-user-manual.org/docs/plugins/#install-using-plugins-admin
 [DelphiZXingQRCodeEx]: https://github.com/MichaelDemidov/DelphiZXingQRCodeEx
 [ZXing]: https://github.com/zxing
 [cci-status]: https://circleci.com/gh/rdipardo/nppQrCode
