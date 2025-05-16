@@ -18,7 +18,7 @@ Just select some text and click the <img src="https://raw.githubusercontent.com/
 A builtin [plugin manager] is available in Notepad++ versions 7.6 and newer.
 
 Find *Plugins* on the main menu bar and select *Plugins Admin...*.
-Check the box beside *NpQrCode* and click *Install*.
+Check the box beside *NppQrCode* and click *Install*.
 
 ### Manual installation
 

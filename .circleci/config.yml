@@ -4,7 +4,7 @@ version: 2.1
 # SPDX-License-Identifier: GPL-3.0-or-later OR Apache-2.0
 #
 orbs:
-  lazarus: rdipardo/lazarus@3
+  lazarus: rdipardo/lazarus@4
   win: circleci/windows@5
 
 references:
@@ -31,10 +31,15 @@ jobs:
         type: string
         default: NppQrCode
     environment:
-      UPX_VER: 4.2.4
+      UPX_VER: 5.0.1
       UPX_DIR: "C:\\upx"
     steps:
       - checkout
+      - run:
+          name: Clone submodules
+          command: |
+            git submodule sync --recursive
+            git submodule update --init --recursive
       - attach_workspace:
           at: .
       - run:
@@ -65,12 +70,12 @@ jobs:
 workflows:
   lazarus-build:
     jobs:
-      - lazarus/build-win:
+      - lazarus/build_win:
           project: NppQrCode
-          bin-dir: bin
-          build-type: Release
-          cross-build: true
+          bin_dir: bin
+          build_type: Release
+          cross_build: true
           <<: *development
       - push-release:
           <<: *production
-          requires: [lazarus/build-win]
+          requires: [lazarus/build_win]

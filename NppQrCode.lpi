@@ -23,7 +23,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\$(BuildMode)\$NameOnly($(ProjFile))$integer(TargetOS).dll"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\$(BuildMode)\$NameOnly($(ProjFile)).dll"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -117,7 +117,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="bin\$(TargetCPU)-$(TargetOS)\$(BuildMode)\$NameOnly($(ProjFile))$integer(TargetOS).dll"/>
+      <Filename Value="bin\$(TargetCPU)-$(TargetOS)\$(BuildMode)\$NameOnly($(ProjFile)).dll"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
