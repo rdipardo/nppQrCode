@@ -17,6 +17,7 @@ references:
       tags:
         only: /v.*/
   production: &production
+    context: gh-release-authoring
     filters:
       branches:
         ignore: /.*/
@@ -59,13 +60,20 @@ jobs:
          command: .\lazarus\make_release.cmd
          shell: cmd.exe
       - store_artifacts:
-          name: Upload << parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
-          path: bin/<< parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
-          destination: << parameters.plugin-name >>_<< pipeline.git.tag >>-win32.zip
+          name: Upload << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          path: bin/<< parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          destination: << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
       - store_artifacts:
-          name: Upload << parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
-          path: bin/<< parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
-          destination: << parameters.plugin-name >>_<< pipeline.git.tag >>-x64.zip
+          name: Upload << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          path: bin/<< parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          destination: << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+      - run:
+          name: Create GitHub Release
+          command: bash.exe .circleci/scripts/gh_release.sh
+          environment:
+            SLUGX86: << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+            SLUGX64: << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+            BIN_DIR: bin
 
 workflows:
   lazarus-build:
