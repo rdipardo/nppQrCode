@@ -32,7 +32,7 @@ jobs:
         type: string
         default: NppQrCode
     environment:
-      UPX_VER: 5.0.1
+      UPX_VER: 5.0.2
       UPX_DIR: "C:\\upx"
     steps:
       - checkout
