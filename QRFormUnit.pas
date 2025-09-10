@@ -260,8 +260,8 @@ var
   S: string;
   F: TQrForm;
 begin
-  S := SelectedText;
-  if Length(TrimRight(S)) > 0 then
+  S := TrimRight(SelectedText);
+  if Length(S) > 0 then
   begin
     F := TQrForm.Create(self);
     try
