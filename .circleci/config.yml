@@ -24,13 +24,14 @@ references:
       tags:
         only: /v.*/
 
+parameters:
+  plugin-name:
+    type: string
+    default: NppQrCode
+
 jobs:
-  push-release:
+  build:
     <<: *executor
-    parameters:
-      plugin-name:
-        type: string
-        default: NppQrCode
     environment:
       UPX_VER: 5.0.2
       UPX_DIR: "C:\\upx"
@@ -41,49 +42,72 @@ jobs:
           command: |
             git submodule sync --recursive
             git submodule update --init --recursive
-      - attach_workspace:
-          at: .
+      - lazarus/install:
+          win32: true
       - run:
           name: Install UPX
           command: |
+            rm -f lazpath.txt
             mkdir -p "$UPX_DIR"
             curl -sLO "https://github.com/upx/upx/releases/download/v$UPX_VER/upx-$UPX_VER-win64.zip"
             7z e upx-$UPX_VER-win64.zip -o"$UPX_DIR"
             "$UPX_DIR\\upx.exe" --version
       - run:
-         name: Pack Release Artifacts
-         command: |
-           "$UPX_DIR\\upx.exe" "bin\\i386-win32\\Release\\<< parameters.plugin-name >>32.dll"
-           "$UPX_DIR\\upx.exe" "bin\\x86_64-win64\\Release\\<< parameters.plugin-name >>64.dll"
-      - run:
          name: Make Release Bundles
          command: .\lazarus\make_release.cmd
          shell: cmd.exe
+      - unless:
+          condition:
+            matches:
+              pattern: 'v.*'
+              value:   << pipeline.git.tag >>
+          steps:
+            - run:
+               name: Pack Release Artifacts
+               command: |
+                 "$UPX_DIR\\upx.exe" "bin\\i386-win32\\Release\\<< pipeline.parameters.plugin-name >>32.dll"
+                 "$UPX_DIR\\upx.exe" "bin\\x86_64-win64\\Release\\<< pipeline.parameters.plugin-name >>64.dll"
+                 7z a -tzip << pipeline.parameters.plugin-name >>64.zip ./bin/x86_64-win64/Release/<< pipeline.parameters.plugin-name >>64.dll
+                 7z a -tzip << pipeline.parameters.plugin-name >>32.zip ./bin/i386-win32/Release/<< pipeline.parameters.plugin-name >>32.dll
+            - store_artifacts:
+                name: Upload << pipeline.parameters.plugin-name >>32.zip
+                path: << pipeline.parameters.plugin-name >>32.zip
+                destination: << pipeline.parameters.plugin-name >>32.zip
+            - store_artifacts:
+                name: Upload << pipeline.parameters.plugin-name >>64.zip
+                path: << pipeline.parameters.plugin-name >>64.zip
+                destination: << pipeline.parameters.plugin-name >>64.zip
+      - persist_to_workspace:
+          root: .
+          paths: bin
+
+  push-release:
+    <<: *executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - store_artifacts:
-          name: Upload << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-          path: bin/<< parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-          destination: << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
       - store_artifacts:
-          name: Upload << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
-          path: bin/<< parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
-          destination: << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
       - run:
           name: Create GitHub Release
           command: bash.exe .circleci/scripts/gh_release.sh
           environment:
-            SLUGX86: << parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-            SLUGX64: << parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+            SLUGX86: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+            SLUGX64: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
             BIN_DIR: bin
 
 workflows:
   lazarus-build:
     jobs:
-      - lazarus/build_win:
-          project: NppQrCode
-          bin_dir: bin
-          build_type: Release
-          cross_build: true
+      - build:
           <<: *development
       - push-release:
           <<: *production
-          requires: [lazarus/build_win]
+          requires: [build]
