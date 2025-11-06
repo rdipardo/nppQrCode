@@ -245,6 +245,9 @@ inherited QrForm: TQrForm
           Top = 0
           Width = 225
           Align = alClient
+          OnClick = pbPreviewClick
+          OnMouseEnter = pbPreviewMouseEnter
+          OnMouseLeave = pbPreviewMouseLeave
           OnPaint = pbPreviewPaint
         end
         object lblQRMetrics: TLabel

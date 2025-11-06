@@ -39,11 +39,11 @@ interface
 uses
 {$ifdef FPC}
   Windows, SysUtils, Classes, Interfaces, LCLIntf, LCLType,
-  Graphics, Controls, Forms, Dialogs, ColorBox,
+  Graphics, Controls, Forms, Dialogs, ColorBox, Menus,
   ExtCtrls, ComCtrls, StdCtrls, Metafiles,
 {$else}
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus,
   Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.StdCtrls,
 {$endif}
   DelphiZXingQRCode, NppForms, NppPlugin;
@@ -123,6 +123,9 @@ type
       Rect: TRect; State: TOwnerDrawState);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure pbPreviewClick(Sender: TObject);
+    procedure pbPreviewMouseEnter(Sender: TObject);
+    procedure pbPreviewMouseLeave(Sender: TObject);
     procedure pbPreviewPaint(Sender: TObject);
     procedure clrbxBackgroundChange(Sender: TObject);
     procedure btnCopyClick(Sender: TObject);
@@ -139,7 +142,18 @@ type
     procedure SetText(const Value: string);
 
   public
+    property QRCode: TDelphiZXingQRCode read FQRCode;
     property Text: string read FText write SetText;
+  end;
+
+  TQrPreviewForm = class(TForm)
+    QrCodePreview: TPaintBox;
+    procedure FormChangeBounds(Sender: TObject);
+    procedure QRCodePreviewPaint(Sender: TObject);
+  private
+    FParentForm: TQRForm;
+  public
+    constructor Create(AParent: TQRForm); reintroduce; overload;
   end;
 
 var
@@ -153,8 +167,10 @@ uses
 
 {$ifdef FPC}
 {$R *.lfm}
+{$R qrpreviewform.lfm}
 {$else}
 {$R *.dfm}
+{$R qrpreviewform.dfm}
 {$endif}
 
 {$ifndef FPC}
@@ -351,6 +367,45 @@ end;
 procedure TQRHelpDlg.VisitRepo;
 begin
   ShellExecuteW(0, 'Open', PWChar(Self.cnstRepo), nil, nil, SW_SHOWNORMAL);
+end;
+
+{ TQrPreviewForm }
+
+constructor TQrPreviewForm.Create(AParent: TQRForm);
+var
+  Menu: TPopupMenu;
+  MItemSaveAs, MItemCopy: TMenuItem;
+begin
+  Create(AParent as TComponent);
+  Menu := TPopupMenu.Create(QrCodePreview);
+  MItemSaveAs := TMenuItem.Create(Menu);
+  MItemCopy := TMenuItem.Create(Menu);
+  MItemSaveAs.Caption := '&Save as...';
+  MItemCopy.Caption := 'Copy to &clipboard';
+  MItemSaveAs.OnClick := AParent.btnSaveToFileClick;
+  MItemCopy.OnClick := AParent.btnCopyClick;
+  Menu.Items.Add(MItemSaveAs);
+  Menu.Items.Add(MItemCopy);
+  QrCodePreview.PopupMenu := Menu;
+  Caption := Format('%s %s', [Caption, AParent.lblQRMetrics.Caption]);
+  FParentForm := AParent;
+end;
+
+procedure TQrPreviewForm.QRCodePreviewPaint(Sender: TObject);
+begin
+  with FParentForm do
+  begin
+    QrCodePreview.Canvas.Pen.Color := clrbxForeground.Selected;
+    QrCodePreview.Canvas.Brush.Color := clrbxBackground.Selected;
+    DrawQR(QrCodePreview.Canvas, QrCodePreview.ClientRect, QRCode,
+      udCornerThickness.Position, TQRDrawingMode(cbbDrawingMode.ItemIndex div 2),
+      Boolean(1 - cbbDrawingMode.ItemIndex mod 2));
+  end;
+end;
+
+procedure TQrPreviewForm.FormChangeBounds(Sender: TObject);
+begin
+  QrCodePreview.SetBounds(Left, Top, BoundsRect.Width, BoundsRect.Height);
 end;
 
 { TQrForm }
@@ -606,6 +661,35 @@ begin
 
   if Key = KEY_ESC then Close;
 
+end;
+
+procedure TQrForm.pbPreviewClick(Sender: TObject);
+begin
+  with TQrPreviewForm.Create(Self) do
+  begin
+    ShowModal;
+    Free;
+  end;
+end;
+
+procedure TQrForm.pbPreviewMouseEnter(Sender: TObject);
+begin
+  with TPaintBox(Sender) do
+  begin
+    Cursor := crHandPoint;
+    Hint := 'Open in new window';
+    ShowHint := True;
+  end;
+end;
+
+procedure TQrForm.pbPreviewMouseLeave(Sender: TObject);
+begin
+  with TPaintBox(Sender) do
+  begin
+    Cursor := crDefault;
+    Hint := '';
+    ShowHint := False;
+  end;
 end;
 
 procedure TQrForm.pbPreviewPaint(Sender: TObject);

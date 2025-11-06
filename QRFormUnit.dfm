@@ -237,6 +237,9 @@ object QrForm: TQrForm
           Width = 225
           Height = 187
           Align = alClient
+          OnClick = pbPreviewClick
+          OnMouseEnter = pbPreviewMouseEnter
+          OnMouseLeave = pbPreviewMouseLeave
           OnPaint = pbPreviewPaint
         end
         object lblQRMetrics: TLabel

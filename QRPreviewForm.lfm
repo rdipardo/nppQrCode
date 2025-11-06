@@ -1,0 +1,24 @@
+object QRPreview: TQrPreviewForm
+  Left = 0
+  Height = 662
+  Top = 0
+  Width = 936
+  BorderIcons = [biSystemMenu, biMaximize]
+  Caption = 'Preview'
+  ClientHeight = 662
+  ClientWidth = 936
+  Color = clBtnFace
+  DesignTimePPI = 144
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  OnChangeBounds = FormChangeBounds
+  object QRCodePreview: TPaintBox
+    Left = 0
+    Height = 662
+    Top = 0
+    Width = 936
+    Align = alClient
+    OnPaint = QRCodePreviewPaint
+  end
+end
