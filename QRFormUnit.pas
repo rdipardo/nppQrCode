@@ -353,7 +353,7 @@ var
 begin
   Msg := UnicodeFormat('Version %s'+Ln, [FVersionStr]);
   Msg := Concat(Msg, UnicodeFormat(#$00A9' 2018 %s (v0.0.0.1)'+Ln, [cnstAuthor]));
-  Msg := Concat(Msg, UnicodeFormat(#$00A9' 2023 %s (current version)'+Ln, [cnstMaintainer]));
+  Msg := Concat(Msg, UnicodeFormat(#$00A9' 2025 %s (current version)'+Ln, [cnstMaintainer]));
   Msg := Concat(Msg, 'Licensed under the GNU General Public License, v3 or later'+Dln);
   Msg := Concat(Msg, 'Using:'+Ln);
   Msg := Concat(Msg, 'DelphiZXingQRCode'+Ln);

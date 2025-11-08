@@ -34,6 +34,9 @@ library NppQrCode;
 *)
 
 {$warn 2025 off}
+{$ifdef CPUx86}
+  {$ImageBase $00400000}
+{$endif}
 {$if not declared(useheaptrace)}
   {$SetPEOptFlags $0040}
 {$endif}

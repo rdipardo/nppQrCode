@@ -5,7 +5,7 @@
 ::
 SETLOCAL
 
-set "VERSION=0.0.0.2"
+set "VERSION=0.0.0.3"
 set "PLUGIN=NppQrCode"
 set "PLUGIN_DLL=.\bin\i386-win32\Release\%PLUGIN%32.dll"
 set "PLUGINX64_DLL=.\bin\x86_64-win64\Release\%PLUGIN%64.dll"
@@ -13,7 +13,7 @@ set "SLUG_NAME=.\bin\%PLUGIN%-v%VERSION%-win32"
 set "SLUGX64_NAME=.\bin\%PLUGIN%-v%VERSION%-x64"
 set "SLUG=%SLUG_NAME%.zip"
 set "SLUGX64=%SLUGX64_NAME%.zip"
-set "DOCS=README.md .\bin\Copyright"
+set "DOCS=CHANGELOG.md README.md .\bin\Copyright"
 
 IF NOT EXIST "%PLUGIN%.lpr" ( pushd %~dp0.. )
 del /S /Q /F bin\*.zip 2>NUL:

@@ -92,7 +92,7 @@ Then run the script as above.
 
 QRFormUnit and resources (c) 2018 Vladimir Korobenkov ([vladk1973](https://github.com/vladk1973))
 
-Bug fixes and revisions (c) 2023 Robert Di Pardo
+Bug fixes and revisions (c) 2023-2025 Robert Di Pardo
 
 All updates to the source code since October 2023 are made available under the terms of the GNU General Public License, Version 3 or later.
 

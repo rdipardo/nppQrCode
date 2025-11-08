@@ -1,6 +1,6 @@
 @echo off
 ::
-:: Copyright (C) 2023,2024 Robert Di Pardo <dipardo.r@gmail.com>
+:: Copyright (C) 2023-2025 Robert Di Pardo <dipardo.r@gmail.com>
 ::
 :: Permission to use, copy, modify, and/or distribute this software for any purpose
 :: with or without fee is hereby granted.
@@ -14,7 +14,7 @@
 :: PERFORMANCE OF THIS SOFTWARE.
 ::
 SETLOCAL
-set "VERSION=0.0.0.2"
+set "VERSION=0.0.0.3"
 set "PLUGIN=NppQrCode"
 set "PLUGIN_DLL=.\bin\Win32\Release\%PLUGIN%.32.dll"
 set "PLUGINX64_DLL=.\bin\Win64\Release\%PLUGIN%.64.dll"
@@ -22,7 +22,7 @@ set "SLUG_NAME=bin\%PLUGIN%-%VERSION%-win32"
 set "SLUGX64_NAME=bin\%PLUGIN%-%VERSION%-x64"
 set "SLUG=%SLUG_NAME%.zip"
 set "SLUGX64=%SLUGX64_NAME%.zip"
-set "DOCS=README.md .\bin\Copyright"
+set "DOCS=CHANGELOG.md README.md .\bin\Copyright"
 
 del /S /Q /F out\*.zip 2>NUL:
 call %~dp0build.cmd Release
