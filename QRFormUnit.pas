@@ -55,6 +55,7 @@ type
     { Private declarations }
     function SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
     const cnstNoSelection = 'Please, select text before using';
+    const errSelectionTooBig = 'Cannot encode that much text! Try a smaller selection.';
     const cnstFunctionCaption = '&Encode selection to QR code';
     const cnstName = 'NppQrCode';
   public
@@ -281,9 +282,15 @@ begin
   begin
     F := TQrForm.Create(self);
     try
-      F.Text := S;
-      F.cmbEncodingChange(self);
-      F.ShowModal;
+      try
+        F.Text := S;
+        F.cmbEncodingChange(self);
+        F.ShowModal;
+      except
+        on E: EQRMatrixTooLarge do begin
+          MessageBoxW(NppData.nppHandle, nppPChar(errSelectionTooBig), nppPChar(PluginName), MB_ICONSTOP + MB_OK);
+        end;
+      end;
     finally
       F.Free;
     end;
