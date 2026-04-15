@@ -3,4 +3,4 @@
 	url = https://github.com/MichaelDemidov/DelphiZXingQRCodeEx.git
 [submodule "DelphiPluginTemplate"]
 	path = Interface
-	url = https://bitbucket.org/rdipardo/delphiplugintemplate.git
+	url = https://github.com/rdipardo/delphiplugintemplate.git
