@@ -87,6 +87,7 @@ type
     cbbErrorCorrectionLevel: TComboBox;
     lblErrorCorrectionLevel: TLabel;
     edtCornerThickness: TEdit;
+    pnlScaleOptions: TPanel;
     udCornerThickness: TUpDown;
     lblCorner: TLabel;
     udQuietZone: TUpDown;
@@ -132,6 +133,7 @@ type
     procedure btnCopyClick(Sender: TObject);
     procedure pgcQRDetailsChange(Sender: TObject);
     procedure ToggleDarkMode; override;
+    procedure SubclassAndTheme(DmfMask: Cardinal); override;
   private
     FQRCode: TDelphiZXingQRCode;
     FText: string;
@@ -164,6 +166,7 @@ implementation
 
 uses
   ShellApi,
+  UxTheme,
   QRGraphics, QR_Win1251, QR_URL, {$ifndef FPC}jpeg,{$endif} Clipbrd, System.UITypes;
 
 {$ifdef FPC}
@@ -469,7 +472,58 @@ end;
 
 procedure TQrForm.ToggleDarkMode;
 begin
-  // TODO: implement a dark mode theme
+  inherited;
+end;
+
+procedure TQrForm.SubclassAndTheme(DmfMask: Cardinal);
+var
+  DarkModeColors: TDarkModeColors;
+  CmBoxTheme: PWChar;
+begin
+  inherited SubclassAndTheme(DmfMask);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, grpSaveToFile.Handle);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, pnlScaleOptions.Handle);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, pnlDetails.Handle);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, pnlColors.Handle);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, pgcQRDetails.Handle);
+  SendMessage(Npp.NppData.NppHandle, NPPM_DARKMODESUBCLASSANDTHEME, DmfMask, tsEncodedData.Handle);
+
+  if Npp.IsDarkModeEnabled then begin
+    CmBoxTheme := 'DarkMode_CFD';
+    DarkModeColors := Default(TDarkModeColors);
+    Npp.GetDarkModeColors(@DarkModeColors);
+    Self.Color := TColor(DarkModeColors.PureBackground);
+    Self.Font.Color := TColor(DarkModeColors.Text);
+    cmbEncoding.Color :=  TColor(DarkModeColors.Background);
+    clrbxBackground.Color := TColor(DarkModeColors.SofterBackground);
+    edtCornerThickness.Color := clrbxBackground.Color;
+    edtQuietZone.Color := clrbxBackground.Color;
+    edtScaleToSave.Color := clrbxBackground.Color;
+  end else begin
+    CmBoxTheme := Nil;
+    Self.Color := clBtnFace;
+    Self.Font.Color := clWindowText;
+    clrbxBackground.Color := clWhite;
+    edtCornerThickness.Color := clWhite;
+    edtScaleToSave.Color := clWhite;
+  end;
+
+  SetWindowTheme(cmbEncoding.Handle, CmBoxTheme, nil);
+  SetWindowTheme(cbbErrorCorrectionLevel.Handle, CmBoxTheme, nil);
+  SetWindowTheme(cbbDrawingMode.Handle, CmBoxTheme, nil);
+  SetWindowTheme(clrbxBackground.Handle, CmBoxTheme, nil);
+  SetWindowTheme(clrbxForeground.Handle, CmBoxTheme, nil);
+
+  cbbErrorCorrectionLevel.Color := cmbEncoding.Color;
+  cbbDrawingMode.Color := cmbEncoding.Color;
+  cmbEncoding.Font.Color := Self.Font.Color;
+  clrbxForeground.Color := clrbxBackground.Color;
+  cbbErrorCorrectionLevel.Font.Color := Self.Font.Color;
+  cbbDrawingMode.Font.Color := Self.Font.Color;
+  clrbxBackground.Font.Color := Self.Font.Color;
+  clrbxForeground.Font.Color := Self.Font.Color;
+  edtCornerThickness.Font.Color := Self.Font.Color;
+  edtQuietZone.Font.Color := Self.Font.Color;
 end;
 
 procedure TQrForm.RemakeQR;
@@ -595,7 +649,9 @@ var
   R1, R2: TRect;
   IsSpecialLine: Boolean;
   OldColor, OldFontColor: TColor;
+  ThemeColor, ThemeFontColor: TColor;
   S: string;
+  DarkModeColors: TDarkModeColors;
 begin
   IsSpecialLine := (Index in [0, ENCODING_UTF8_BOM + 1]) and
     not (odComboBoxEdit in State);
@@ -615,11 +671,22 @@ begin
     begin
       if IsSpecialLine then
       begin
+        if Npp.IsDarkModeEnabled then
+        begin
+          DarkModeColors := Default(TDarkModeColors);
+          Npp.GetDarkModeColors(@DarkModeColors);
+          ThemeColor := TColor(DarkModeColors.SofterBackground);
+          ThemeFontColor := TColor(DarkModeColors.DisabledText);
+        end else
+        begin
+          ThemeColor := clBtnFace;
+          ThemeFontColor := clGrayText;
+        end;
         OldColor := Canvas.Brush.Color;
         OldFontColor := Canvas.Font.Color;
-        Canvas.Brush.Color := clBtnFace;
+        Canvas.Brush.Color := ThemeColor;
         Canvas.Font.Style := [fsBold];
-        Canvas.Font.Color := clGrayText;
+        Canvas.Font.Color := ThemeFontColor;
         Canvas.FillRect(R1);
         if Index = 0 then
           S := 'Default'

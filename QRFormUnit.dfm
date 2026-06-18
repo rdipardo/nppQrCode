@@ -151,15 +151,6 @@ object QrForm: TQrForm
       Height = 121
       Caption = '&Save / Copy'
       TabOrder = 8
-      object lblScaleToSave: TLabel
-        Left = 8
-        Top = 24
-        Width = 76
-        Height = 13
-        Caption = 'Dot size (pixels)'
-        FocusControl = edtScaleToSave
-        Transparent = True
-      end
       object edtFileName: TEdit
         Left = 8
         Top = 56
@@ -177,24 +168,6 @@ object QrForm: TQrForm
         TabOrder = 3
         OnClick = btnSaveToFileClick
       end
-      object edtScaleToSave: TEdit
-        Left = 112
-        Top = 20
-        Width = 49
-        Height = 21
-        TabOrder = 0
-        Text = '10'
-      end
-      object udScaleToSave: TUpDown
-        Left = 161
-        Top = 20
-        Width = 16
-        Height = 21
-        Associate = edtScaleToSave
-        Min = 1
-        Position = 10
-        TabOrder = 1
-      end
       object btnCopy: TButton
         Left = 8
         Top = 88
@@ -203,6 +176,41 @@ object QrForm: TQrForm
         Caption = 'C&opy Bitmap to Clipboard'
         TabOrder = 4
         OnClick = btnCopyClick
+      end
+      object pnlScaleOptions: TPanel
+        Left = 10
+        Height = 52
+        Top = 2
+        Width = 364
+        BevelOuter = bvNone
+        TabOrder = 0
+        object lblScaleToSave: TLabel
+          Left = 0
+          Top = 24
+          Width = 76
+          Height = 13
+          Caption = 'Dot size (pixels)'
+          FocusControl = edtScaleToSave
+          Transparent = True
+        end
+        object udScaleToSave: TUpDown
+          Left = 161
+          Top = 20
+          Width = 16
+          Height = 21
+          Associate = edtScaleToSave
+          Min = 1
+          Position = 10
+          TabOrder = 0
+        end
+        object edtScaleToSave: TEdit
+          Left = 102
+          Top = 20
+          Width = 49
+          Height = 21
+          TabOrder = 1
+          Text = '10'
+        end
       end
     end
     object cbbDrawingMode: TComboBox
