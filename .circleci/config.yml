@@ -1,6 +1,6 @@
 version: 2.1
 #
-# SPDX-FileCopyrightText: Copyright (c) 2025 Robert Di Pardo
+# SPDX-FileCopyrightText: Copyright (c) 2025,2026 Robert Di Pardo
 # SPDX-License-Identifier: GPL-3.0-or-later OR Apache-2.0
 #
 orbs:
@@ -17,7 +17,9 @@ references:
       tags:
         only: /v.*/
   production: &production
-    context: gh-release-authoring
+    context:
+      - azure
+      - gh-release-authoring
     filters:
       branches:
         ignore: /.*/
@@ -33,7 +35,7 @@ jobs:
   build:
     <<: *executor
     environment:
-      UPX_VER: 5.0.2
+      UPX_VER: 5.2.1
       UPX_DIR: "C:\\upx"
     steps:
       - checkout
@@ -81,21 +83,13 @@ jobs:
           root: .
           paths: bin
 
-  push-release:
+  push_release:
     <<: *executor
     steps:
       - checkout:
           method: full
       - attach_workspace:
           at: .
-      - store_artifacts:
-          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
-      - store_artifacts:
-          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
-          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
-          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
       - run:
           name: Create GitHub Release
           command: bash.exe .circleci/scripts/gh_release.sh
@@ -104,11 +98,72 @@ jobs:
             SLUGX64: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
             BIN_DIR: bin
 
+  sign_artifacts:
+    <<: *executor
+    environment:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      PLUGIN_x86_DLL: ./bin/i386-win32/Release/<< pipeline.parameters.plugin-name >>32.dll
+      PLUGIN_x64_DLL: ./bin/x86_64-win64/Release/<< pipeline.parameters.plugin-name >>64.dll
+      SLUG_x86: ./bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+      SLUG_x64: ./bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+    steps:
+      - checkout:
+          method: full
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install code signing CLI tool
+          command: dotnet tool install -g --prerelease sign
+      - run:
+          name: Login to Azure
+          shell: powershell.exe
+          command: |
+            az login `
+                --service-principal `
+                --user "${env:AZURE_CLIENT_ID}" `
+                --tenant "${env:AZURE_TENANT_ID}" `
+                --federated-token "${env:CIRCLE_OIDC_TOKEN}" | Out-Null
+      - run:
+          name: Sign release artifacts
+          shell: powershell.exe
+          command: |
+            sign code artifact-signing `
+                --azure-credential-type azure-cli `
+                --verbosity warning `
+                --timestamp-url http://timestamp.acs.microsoft.com `
+                --artifact-signing-endpoint https://ncus.codesigning.azure.net `
+                --artifact-signing-account devcerts `
+                --artifact-signing-certificate-profile gha-artifact-signing `
+                "$env:PLUGIN_x86_DLL" `
+                "$env:PLUGIN_x64_DLL"
+      - run:
+          name: Pack release archives
+          command: |
+            rm -f ./bin/*.zip
+            7z a -tzip "${env:SLUG_x86}" "${env:PLUGIN_x86_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
+            7z a -tzip "${env:SLUG_x64}" "${env:PLUGIN_x64_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
+      - store_artifacts:
+          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
+      - store_artifacts:
+          name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+          destination: << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-x64.zip
+      - persist_to_workspace:
+          root: .
+          paths: bin
+
 workflows:
-  lazarus-build:
+  lazarus_build:
     jobs:
       - build:
           <<: *development
-      - push-release:
+      - sign_artifacts:
           <<: *production
-          requires: [build]
+          requires:
+            - build
+      - push_release:
+          <<: *production
+          requires:
+            - sign_artifacts
