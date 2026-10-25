@@ -50,9 +50,11 @@ uses
 
 type
 
+  TDarkModeChange = procedure of object;
   TQrPlugin = class(TNppPlugin)
   private
     { Private declarations }
+    FOnDarkModeChange: TDarkModeChange;
     function SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
     const cnstNoSelection = 'Please, select text before using';
     const errSelectionTooBig = 'Cannot encode that much text! Try a smaller selection.';
@@ -60,10 +62,12 @@ type
     const cnstName = 'NppQrCode';
   public
     constructor Create;
+    procedure BeNotified(sn: PSciNotification); override;
     procedure DoNppnToolbarModification; override;
     function SelectedText: string;
     procedure FuncQr;
     procedure FuncShowHelp;
+    property OnDarkModeChange: TDarkModeChange read FOnDarkModeChange write FOnDarkModeChange;
   end;
 
   TQRHelpDlg = class
@@ -117,6 +121,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure cmbEncodingChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormRecreate;
     procedure btnSaveToFileClick(Sender: TObject);
     procedure cbbDrawingModeChange(Sender: TObject);
     procedure cmbEncodingMeasureItem(Control: TWinControl; Index: Integer;
@@ -240,6 +245,17 @@ begin
     end
     else
       Result := String(UTF8Encode(Chars))
+  end;
+end;
+
+procedure TQrPlugin.BeNotified(sn: PSciNotification);
+begin
+  inherited;
+  if HWND(sn^.nmhdr.hwndFrom) = Self.NppData.NppHandle then begin
+    if (sn^.nmhdr.code = NPPN_DARKMODECHANGED) then begin
+      if Assigned(OnDarkModeChange) then
+        OnDarkModeChange;
+    end;
   end;
 end;
 
@@ -467,7 +483,13 @@ begin
   FQRCode := TDelphiZXingQRCode.Create;
   FQRCode.RegisterEncoder(ENCODING_WIN1251, TWin1251Encoder);
   FQRCode.RegisterEncoder(ENCODING_URL, TURLEncoder);
+  NPlugin.OnDarkModeChange := FormRecreate;
+end;
 
+procedure TQrForm.FormRecreate;
+begin
+  ModalResult := mrCancel;
+  NPlugin.FuncQr;
 end;
 
 procedure TQrForm.ToggleDarkMode;
@@ -554,6 +576,7 @@ end;
 procedure TQrForm.FormDestroy(Sender: TObject);
 begin
   FQRCode.Free;
+  NPlugin.OnDarkModeChange := Nil;
 end;
 
 procedure TQrForm.btnSaveToFileClick(Sender: TObject);
