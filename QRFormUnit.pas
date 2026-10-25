@@ -46,7 +46,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus,
   Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.StdCtrls,
 {$endif}
-  DelphiZXingQRCode, NppForms, NppPlugin;
+  DelphiZXingQRCode, NppForms, NppPlugin, Utf8IniFiles;
 
 type
 
@@ -64,6 +64,7 @@ type
     constructor Create;
     procedure BeNotified(sn: PSciNotification); override;
     procedure DoNppnToolbarModification; override;
+    function GetIniPath: string;
     function SelectedText: string;
     procedure FuncQr;
     procedure FuncShowHelp;
@@ -170,6 +171,7 @@ var
 implementation
 
 uses
+  Math,
   ShellApi,
   UxTheme,
   QRGraphics, QR_Win1251, QR_URL, {$ifndef FPC}jpeg,{$endif} Clipbrd, System.UITypes;
@@ -331,6 +333,11 @@ begin
   end;
 end;
 
+function TQrPlugin.GetIniPath: string;
+begin
+  Result := UnicodeFormat('%s\%s%d.ini', [GetPluginsConfigDir, cnstName, SizeOf(NativeInt) shl 3]);
+end;
+
 { TQRHelpDlg }
 
 constructor TQRHelpDlg.Create;
@@ -457,26 +464,55 @@ begin
     GetWindowLongPtr(edtScaleToSave.Handle, GWL_STYLE) or ES_NUMBER);
 
   Position := poScreenCenter;
-  with cmbEncoding do
+  with TUtf8IniFile.Create(NPlugin.GetIniPath) do
   begin
-    H := ItemHeight;
-    Style := csOwnerDrawVariable;
-    ItemHeight := H;
-    OnChange := nil;
-    ItemIndex := 0;
-    OnChange := cmbEncodingChange
-  end;
-  with cbbErrorCorrectionLevel do
-  begin
-    OnChange := nil;
-    ItemIndex := 0;
-    OnChange := cmbEncodingChange
-  end;
-  with cbbDrawingMode do
-  begin
-    OnChange := nil;
-    ItemIndex := 0;
-    OnChange := cbbDrawingModeChange
+    try
+      with cmbEncoding do
+      begin
+        H := ItemHeight;
+        Style := csOwnerDrawVariable;
+        ItemHeight := H;
+        OnChange := nil;
+        ItemIndex := Max(0, ReadInteger('QR_CODE_SETTINGS', 'Encoding', cmbEncoding.ItemIndex));
+        OnChange := cmbEncodingChange
+      end;
+      with cbbErrorCorrectionLevel do
+      begin
+        OnChange := nil;
+        ItemIndex := Max(0, ReadInteger('QR_CODE_SETTINGS', 'ErrorCorrectionLevel', cbbErrorCorrectionLevel.ItemIndex));
+        OnChange := cmbEncodingChange
+      end;
+      with cbbDrawingMode do
+      begin
+        OnChange := nil;
+        ItemIndex := Max(0, ReadInteger('QR_CODE_SETTINGS', 'DrawingMode', cbbDrawingMode.ItemIndex));
+        OnChange := cbbDrawingModeChange
+      end;
+      with clrbxBackground do
+      begin
+        OnChange := nil;
+        Selected := TColor(ReadInteger('QR_CODE_SETTINGS', 'Background', Ord(clrbxBackground.Selected)));
+        OnChange := clrbxBackgroundChange;
+      end;
+      with clrbxForeground do
+      begin
+        OnChange := nil;
+        Selected := TColor(ReadInteger('QR_CODE_SETTINGS', 'Foreground', Ord(clrbxForeground.Selected)));
+        OnChange := clrbxBackgroundChange;
+      end;
+
+      edtQuietZone.OnChange := nil;
+      udQuietZone.Position := Max(udQuietZone.Min, ReadInteger('QR_CODE_SETTINGS', 'QuietZone', udQuietZone.Position));
+      edtQuietZone.OnChange := cmbEncodingChange;
+
+      edtCornerThickness.OnChange := nil;
+      udCornerThickness.Position := Max(udCornerThickness.Min, ReadInteger('QR_CODE_SETTINGS', 'CornerThickness', udCornerThickness.Position));
+      edtCornerThickness.OnChange := clrbxBackgroundChange;
+
+      udScaleToSave.Position := Max(udScaleToSave.Min, ReadInteger('QR_CODE_SETTINGS', 'Pixels', udScaleToSave.Position));
+    finally
+      Free;
+    end;
   end;
 
   // create and prepare QRCode component
@@ -575,6 +611,21 @@ end;
 
 procedure TQrForm.FormDestroy(Sender: TObject);
 begin
+  with TUtf8IniFile.Create(NPlugin.GetIniPath) do
+  begin
+    try
+       WriteInteger('QR_CODE_SETTINGS', 'Encoding', cmbEncoding.ItemIndex);
+       WriteInteger('QR_CODE_SETTINGS', 'QuietZone',udQuietZone.Position);
+       WriteInteger('QR_CODE_SETTINGS', 'ErrorCorrectionLevel', cbbErrorCorrectionLevel.ItemIndex);
+       WriteInteger('QR_CODE_SETTINGS', 'DrawingMode', cbbDrawingMode.ItemIndex);
+       WriteInteger('QR_CODE_SETTINGS', 'CornerThickness', udCornerThickness.Position);
+       WriteInteger('QR_CODE_SETTINGS', 'Pixels', udScaleToSave.Position);
+       WriteInteger('QR_CODE_SETTINGS', 'Background', clrbxBackground.Selected);
+       WriteInteger('QR_CODE_SETTINGS', 'Foreground', clrbxForeground.Selected);
+    finally
+      Free;
+    end;
+  end;
   FQRCode.Free;
   NPlugin.OnDarkModeChange := Nil;
 end;

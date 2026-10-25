@@ -48,6 +48,7 @@ uses
   QRFormUnit in 'QRFormUnit.pas' {QrForm},
   QR_Win1251 in 'DelphiZXIngQRCode\Source\QR_Win1251.pas',
   QR_URL in 'DelphiZXIngQRCode\Source\QR_URL.pas',
+  utf8inifiles in 'Interface\Source\Units\Common\utf8inifiles.pas',
   NppForms in 'Interface\Source\Forms\Common\NppForms.pas' {NppForm},
   nppplugin in 'Interface\Source\Units\Common\nppplugin.pas';
 
