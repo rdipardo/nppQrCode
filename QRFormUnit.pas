@@ -55,6 +55,7 @@ type
   private
     { Private declarations }
     FOnDarkModeChange: TDarkModeChange;
+    FEnableDarkMode: Boolean;
     function SendMsg(const _hwnd: HWND; Message: UINT; _wParam: WPARAM = 0; _lParam: Pointer = nil): LRESULT;
     const cnstNoSelection = 'Please, select text before using';
     const errSelectionTooBig = 'Cannot encode that much text! Try a smaller selection.';
@@ -68,6 +69,7 @@ type
     function SelectedText: string;
     procedure FuncQr;
     procedure FuncShowHelp;
+    property EnableDarkMode: Boolean read FEnableDarkMode write FEnableDarkMode;
     property OnDarkModeChange: TDarkModeChange read FOnDarkModeChange write FOnDarkModeChange;
   end;
 
@@ -184,6 +186,9 @@ uses
 {$R qrpreviewform.dfm}
 {$endif}
 
+const
+  dmDlgId = 1;
+
 {$ifndef FPC}
   function UnicodeFormat(const FmtStr: string; Args: array of const): string;
   begin
@@ -201,6 +206,12 @@ begin
   NPlugin.FuncShowHelp;
 end;
 
+procedure _FuncToggleDarkMode; cdecl;
+begin
+  NPlugin.EnableDarkMode := not NPlugin.EnableDarkMode;
+  SendMessageW(NPlugin.NppData.NppHandle, NPPM_SETMENUITEMCHECK, NPlugin.CmdIdFromDlgId(dmDlgId), LPARAM(LongBool(NPlugin.EnableDarkMode)));
+end;
+
 { TQrPlugin }
 
 constructor TQrPlugin.Create;
@@ -210,6 +221,7 @@ begin
   inherited;
   PluginName := cnstName;
   AddFuncItem(cnstFunctionCaption, _FuncQr);
+  AddFuncItem('Follow &dark theme', _FuncToggleDarkMode);
   AddFuncItem('&About...', _FuncShowHelp);
 end;
 
@@ -254,9 +266,29 @@ procedure TQrPlugin.BeNotified(sn: PSciNotification);
 begin
   inherited;
   if HWND(sn^.nmhdr.hwndFrom) = Self.NppData.NppHandle then begin
-    if (sn^.nmhdr.code = NPPN_DARKMODECHANGED) then begin
-      if Assigned(OnDarkModeChange) then
-        OnDarkModeChange;
+    case (sn^.nmhdr.code) of
+      NPPN_READY:
+        with TUtf8IniFile.Create(GetIniPath) do
+        begin
+          try
+            FEnableDarkMode := ReadBool('QR_FORM_OPTIONS', 'DarkMode', False);
+            SendMessageW(NppData.NppHandle, NPPM_SETMENUITEMCHECK, CmdIdFromDlgId(dmDlgId), LPARAM(LongBool(FEnableDarkMode)));
+          finally
+            Free;
+          end;
+        end;
+      NPPN_SHUTDOWN:
+        with TUtf8IniFile.Create(GetIniPath) do
+        begin
+          try
+            WriteBool('QR_FORM_OPTIONS', 'DarkMode', FEnableDarkMode);
+          finally
+            Free;
+          end;
+        end;
+      NPPN_DARKMODECHANGED:
+        if FEnableDarkMode and Assigned(OnDarkModeChange) then
+          OnDarkModeChange;
     end;
   end;
 end;
@@ -524,12 +556,16 @@ end;
 
 procedure TQrForm.FormRecreate;
 begin
+  if not NPlugin.EnableDarkMode then
+    Exit;
   ModalResult := mrCancel;
   NPlugin.FuncQr;
 end;
 
 procedure TQrForm.ToggleDarkMode;
 begin
+  if not NPlugin.EnableDarkMode then
+    Exit;
   inherited;
 end;
 
@@ -745,7 +781,7 @@ begin
     begin
       if IsSpecialLine then
       begin
-        if Npp.IsDarkModeEnabled then
+        if Npp.IsDarkModeEnabled and NPlugin.EnableDarkMode then
         begin
           DarkModeColors := Default(TDarkModeColors);
           Npp.GetDarkModeColors(@DarkModeColors);
