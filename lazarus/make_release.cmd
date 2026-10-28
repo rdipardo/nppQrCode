@@ -5,7 +5,7 @@
 ::
 SETLOCAL
 
-set "VERSION=0.0.0.3"
+set "VERSION=0.0.0.4"
 set "PLUGIN=NppQrCode"
 set "PLUGIN_DLL=.\bin\i386-win32\Release\%PLUGIN%32.dll"
 set "PLUGINX64_DLL=.\bin\x86_64-win64\Release\%PLUGIN%64.dll"

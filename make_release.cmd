@@ -14,7 +14,7 @@
 :: PERFORMANCE OF THIS SOFTWARE.
 ::
 SETLOCAL
-set "VERSION=0.0.0.3"
+set "VERSION=0.0.0.4"
 set "PLUGIN=NppQrCode"
 set "PLUGIN_DLL=.\bin\Win32\Release\%PLUGIN%.32.dll"
 set "PLUGINX64_DLL=.\bin\Win64\Release\%PLUGIN%.64.dll"

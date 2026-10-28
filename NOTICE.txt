@@ -16,4 +16,4 @@ This product includes software developed by:
    https://sourceforge.net/projects/npp-plugins/files/DelphiPluginTemplate
 
  * Robert Di Pardo
-   https://bitbucket.org/rdipardo/DelphiPluginTemplate
+   https://github.com/rdipardo/delphiplugintemplate

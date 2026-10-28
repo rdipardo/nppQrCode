@@ -6,9 +6,11 @@ A Notepad++ plugin for creating QR codes from selected text.
 Just select some text and click the <img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/qr.jpg"> button.
 
 <div align="center">
-	<a href="https://github.com/rdipardo/NppQrCode">
-		<img src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/hello.jpg">
-	</a>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/hello.jpg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/hello-dark.jpg">
+    <img alt="QR Code Plugin for Notepad++" src="https://raw.githubusercontent.com/rdipardo/NppQrCode/master/img/hello.jpg">
+  </picture>
 </div>
 
 ## Installation
@@ -92,7 +94,7 @@ Then run the script as above.
 
 QRFormUnit and resources (c) 2018 Vladimir Korobenkov ([vladk1973](https://github.com/vladk1973))
 
-Bug fixes and revisions (c) 2023-2025 Robert Di Pardo
+Bug fixes and revisions (c) 2023-2026 Robert Di Pardo
 
 All updates to the source code since October 2023 are made available under the terms of the GNU General Public License, Version 3 or later.
 
@@ -104,10 +106,10 @@ the GNU General Public License, Version 3 or later. Some individual files may al
 Public License, Version 2.0. Visit [the template repository][1] for complete information.
 
 [0]: https://github.com/foxitsoftware/DelphiZXingQRCode
-[1]: https://bitbucket.org/rdipardo/DelphiPluginTemplate
+[1]: https://github.com/rdipardo/delphiplugintemplate
 [2]: https://sourceforge.net/projects/npp-plugins/files/DelphiPluginTemplate
-[3]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-installing-lazarus
-[4]: https://bitbucket.org/rdipardo/delphiplugintemplate/wiki/Home#markdown-header-at-the-command-line
+[3]: https://github.com/rdipardo/delphiplugintemplate/wiki#installing-lazarus
+[4]: https://github.com/rdipardo/delphiplugintemplate/wiki#at-the-command-line
 [release archive]: https://github.com/rdipardo/nppQrCode/releases
 [plugin manager]: https://npp-user-manual.org/docs/plugins/#install-using-plugins-admin
 [DelphiZXingQRCodeEx]: https://github.com/MichaelDemidov/DelphiZXingQRCodeEx

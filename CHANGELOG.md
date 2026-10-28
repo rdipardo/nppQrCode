@@ -1,3 +1,9 @@
+### 0.0.0.4
+
+- Save QR image settings to a local INI file
+- Add the option to synchronize the QR form with the active dark mode theme
+- Digitally sign release DLLs
+
 ### 0.0.0.3
 
 - Make preview images expandable to full-screen size ([#4])

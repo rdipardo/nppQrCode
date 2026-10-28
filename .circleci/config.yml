@@ -140,8 +140,8 @@ jobs:
           name: Pack release archives
           command: |
             rm -f ./bin/*.zip
-            7z a -tzip "${env:SLUG_x86}" "${env:PLUGIN_x86_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
-            7z a -tzip "${env:SLUG_x64}" "${env:PLUGIN_x64_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
+            7z a -tzip "${SLUG_x86}" "${PLUGIN_x86_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
+            7z a -tzip "${SLUG_x64}" "${PLUGIN_x64_DLL}" CHANGELOG.md README.md ./bin/Copyright -y
       - store_artifacts:
           name: Upload << pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
           path: bin/<< pipeline.parameters.plugin-name >>-<< pipeline.git.tag >>-win32.zip
